@@ -12,6 +12,10 @@ def get_cached_stocks():
     scraper = TSXScraper()
     return scraper.get_stocks(days=10) or []
 
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('static', filename)
+
 @app.route('/')
 def home():
     stocks = get_cached_stocks()
