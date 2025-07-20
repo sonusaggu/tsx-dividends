@@ -4,6 +4,7 @@ let currentPage = 1;
 let currentDaysFilter = null;
 let currentSearchSymbol = null;
 let currentSectorFilter = null;
+let currentHighYieldFilter = false;
 let allStocks = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -22,11 +23,15 @@ function setupEventListeners() {
             currentPage = 1;
             currentSearchSymbol = null;
             currentSectorFilter = null;
+            currentHighYieldFilter = false;
             
             // Update active button
             document.querySelectorAll('#timeframe-buttons .btn').forEach(btn => {
                 btn.classList.toggle('active', btn === e.target);
             });
+            
+            // Update high yield filter button
+            document.getElementById('high-yield-filter').classList.remove('active');
             
             // Update title
             document.getElementById('timeframe-title').textContent = 
@@ -48,6 +53,7 @@ function setupEventListeners() {
             }
         }
     });
+    
     // Search functionality
     document.getElementById('search-button').addEventListener('click', searchBySymbol);
     document.getElementById('clear-search').addEventListener('click', clearSearch);
@@ -69,6 +75,14 @@ function setupEventListeners() {
             currentPage = 1;
             filterAndRenderStocks();
         }
+    });
+    
+    // High yield filter click handler
+    document.getElementById('high-yield-filter').addEventListener('click', function() {
+        currentHighYieldFilter = !currentHighYieldFilter;
+        this.classList.toggle('active', currentHighYieldFilter);
+        currentPage = 1;
+        filterAndRenderStocks();
     });
 }
 
@@ -115,6 +129,13 @@ function filterAndRenderStocks() {
         );
     }
     
+    // Apply high yield filter if active
+    if (currentHighYieldFilter) {
+        filteredStocks = filteredStocks.filter(stock => 
+            parseFloat(stock.yield) > 5
+        );
+    }
+    
     renderStocks(filteredStocks);
 }
 
@@ -156,6 +177,8 @@ async function searchBySymbol() {
     currentSearchSymbol = symbol;
     currentPage = 1;
     currentSectorFilter = null;
+    currentHighYieldFilter = false;
+    document.getElementById('high-yield-filter').classList.remove('active');
     
     const spinner = document.getElementById('loading-spinner');
     const feedback = document.getElementById('search-feedback');
@@ -198,6 +221,8 @@ function clearSearch() {
     document.getElementById('search-feedback').textContent = '';
     currentSearchSymbol = null;
     currentSectorFilter = null;
+    currentHighYieldFilter = false;
+    document.getElementById('high-yield-filter').classList.remove('active');
     currentPage = 1;
     fetchStocks(currentDaysFilter);
 }
