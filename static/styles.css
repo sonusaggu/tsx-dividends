@@ -40,7 +40,6 @@ body {
 }
 
 /* ============ COLUMN WIDTHS ============ */
-/* ============ COLUMN WIDTHS ============ */
 #stocks-table .symbol-col {
     width: 8%;
     min-width: 80px;
@@ -160,7 +159,6 @@ body {
     }
 }
 
-
 /* ============ BADGE STYLES ============ */
 .badge {
     font-weight: 500;
@@ -225,4 +223,30 @@ body {
     #timeframe-buttons .btn {
         padding: 0.5rem 1rem;
     }
+}
+
+/* ============ SECTOR TAGS STYLES ============ */
+.sector-tags .card-body {
+    padding: 1rem;
+}
+
+.sector-tag {
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    background-color: #f0f0f0;
+    border: 1px solid #dee2e6;
+    font-size: 0.8rem;
+    color: #495057;
+}
+
+.sector-tag:hover {
+    background-color: #e2e6ea;
+}
+
+.sector-tag.active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
 }

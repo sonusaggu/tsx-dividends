@@ -3,6 +3,7 @@ const itemsPerPage = 15;
 let currentPage = 1;
 let currentDaysFilter = null;
 let currentSearchSymbol = null;
+let currentSectorFilter = null;
 let allStocks = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -20,6 +21,7 @@ function setupEventListeners() {
             currentDaysFilter = e.target.dataset.days === 'all' ? null : parseInt(e.target.dataset.days);
             currentPage = 1;
             currentSearchSymbol = null;
+            currentSectorFilter = null;
             
             // Update active button
             document.querySelectorAll('#timeframe-buttons .btn').forEach(btn => {
@@ -41,7 +43,7 @@ function setupEventListeners() {
             const page = parseInt(e.target.dataset.page);
             if (!isNaN(page) && page !== currentPage) {
                 currentPage = page;
-                renderStocks(allStocks);
+                filterAndRenderStocks();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
@@ -52,6 +54,22 @@ function setupEventListeners() {
     document.getElementById('clear-search').addEventListener('click', clearSearch);
     document.getElementById('symbol-search').addEventListener('keyup', function(e) {
         if (e.key === 'Enter') searchBySymbol();
+    });
+    
+    // Sector tags click handler
+    document.getElementById('sector-tags').addEventListener('click', function(e) {
+        if (e.target.classList.contains('sector-tag')) {
+            const sector = e.target.dataset.sector === 'all' ? null : e.target.dataset.sector;
+            
+            // Update active tag
+            document.querySelectorAll('#sector-tags .sector-tag').forEach(tag => {
+                tag.classList.toggle('active', tag === e.target);
+            });
+            
+            currentSectorFilter = sector;
+            currentPage = 1;
+            filterAndRenderStocks();
+        }
     });
 }
 
@@ -75,7 +93,8 @@ async function fetchStocks(days = null) {
         }
         
         allStocks = data.data;
-        renderStocks(allStocks);
+        updateSectorTags(allStocks);
+        filterAndRenderStocks();
         document.getElementById('last-updated').innerHTML = `
             <i class="bi bi-clock-history"></i> Updated: ${data.updated}`;
             
@@ -87,6 +106,47 @@ async function fetchStocks(days = null) {
     }
 }
 
+function filterAndRenderStocks() {
+    let filteredStocks = [...allStocks];
+    
+    // Apply sector filter if active
+    if (currentSectorFilter) {
+        filteredStocks = filteredStocks.filter(stock => 
+            stock.sector && stock.sector.toLowerCase() === currentSectorFilter.toLowerCase()
+        );
+    }
+    
+    renderStocks(filteredStocks);
+}
+
+function updateSectorTags(stocks) {
+    const sectorTagsContainer = document.getElementById('sector-tags');
+    
+    // Extract unique sectors
+    const sectors = [...new Set(stocks.map(stock => stock.sector).filter(Boolean))];
+    
+    // Sort sectors alphabetically
+    sectors.sort();
+    
+    // Create tags HTML
+    let tagsHtml = `
+        <span class="sector-tag ${!currentSectorFilter ? 'active' : ''}" data-sector="all">
+            All Sectors
+        </span>
+    `;
+    
+    sectors.forEach(sector => {
+        tagsHtml += `
+            <span class="sector-tag ${currentSectorFilter === sector ? 'active' : ''}" 
+                  data-sector="${sector}">
+                ${sector}
+            </span>
+        `;
+    });
+    
+    sectorTagsContainer.innerHTML = tagsHtml;
+}
+
 async function searchBySymbol() {
     const symbol = document.getElementById('symbol-search').value.trim().toUpperCase();
     if (!symbol) {
@@ -96,6 +156,7 @@ async function searchBySymbol() {
 
     currentSearchSymbol = symbol;
     currentPage = 1;
+    currentSectorFilter = null;
     
     const spinner = document.getElementById('loading-spinner');
     const feedback = document.getElementById('search-feedback');
@@ -117,6 +178,7 @@ async function searchBySymbol() {
         } else {
             showSearchFeedback(`Showing results for ${symbol}`, 'text-success');
             allStocks = data.data;
+            updateSectorTags(allStocks);
             renderStocks(allStocks);
         }
         
@@ -136,6 +198,7 @@ function clearSearch() {
     document.getElementById('symbol-search').value = '';
     document.getElementById('search-feedback').textContent = '';
     currentSearchSymbol = null;
+    currentSectorFilter = null;
     currentPage = 1;
     fetchStocks(currentDaysFilter);
 }
