@@ -10,6 +10,9 @@
     <title>TSX Dividend Tracker | Upcoming Canadian Stock Dividends</title>
     <link rel="canonical" href="https://dividend.forum/" />
     
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
+    
     <!-- Favicon -->
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
@@ -27,10 +30,10 @@
         <!-- Header Section -->
         <header class="row mb-4">
             <div class="col-12 text-center">
-                <h1 class="display-5 fw-bold text-primary">
-                    <i class="bi bi-cash-stack" aria-hidden="true"></i> TSX Dividend Tracker
+                <h1 class="display-6 fw-bold text-primary mb-2">
+                    <i class="bi bi-cash-stack me-2" aria-hidden="true"></i> TSX Dividend Tracker
                 </h1>
-                <p class="text-muted">Track upcoming dividend payments on TSX-listed stocks</p>
+                <p class="text-muted mb-0">Track upcoming dividend payments on TSX-listed stocks</p>
             </div>
         </header>
 
@@ -53,18 +56,21 @@
                         <!-- Search Bar -->
                         <div class="col-12 col-md-8 text-center">
                             <div class="input-group shadow-sm mx-auto" style="max-width: 100%;">
+                                <span class="input-group-text bg-white">
+                                    <i class="bi bi-search text-secondary"></i>
+                                </span>
                                 <input type="text" 
-                                       class="form-control" 
+                                       class="form-control border-start-0" 
                                        id="symbol-search" 
-                                       placeholder="Search symbol..."
+                                       placeholder="Search symbol (e.g. TD, ENB)..."
                                        aria-label="Stock symbol search">
                                 <button class="btn btn-primary" type="button" id="search-button">
-                                    <i class="bi bi-search me-1"></i>
                                     <span class="d-none d-sm-inline">Search</span>
+                                    <i class="bi bi-search d-sm-none"></i>
                                 </button>
                                 <button class="btn btn-outline-secondary" type="button" id="clear-search">
+                                    <i class="bi bi-x"></i>
                                     <span class="d-none d-sm-inline">Clear</span>
-                                    <i class="bi bi-x d-sm-none"></i>
                                 </button>
                             </div>
                             <div id="search-feedback" class="text-center mt-2 small"></div>
@@ -82,7 +88,7 @@
                 </div>
                 <div class="col-md-6 text-md-end">
                     <div class="text-muted small" id="last-updated">
-                        <i class="bi bi-clock-history"></i> Loading...
+                        <i class="bi bi-clock-history me-1"></i> Loading...
                     </div>
                 </div>
             </div>
@@ -161,14 +167,18 @@
         </nav>
 
         <!-- Footer -->
-        <footer class="mt-5 pt-4 pb-3 bg-light text-center text-muted small border-top">
+        <footer class="mt-5 pt-4 pb-3 bg-primary bg-opacity-10 text-center text-muted small border-top border-primary border-opacity-10">
             <div class="container">
-                <p class="mb-1">
-                    <strong>Note:</strong> Data updates hourly.
-                </p>
-                <p class="mb-1">
-                    Site maintained by <a href="#" class="text-decoration-none" aria-label="TritonX Inc.">TritonX Inc.</a>
-                </p>
+                <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-3">
+                    <p class="mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        <strong>Note:</strong> Data updates hourly.
+                    </p>
+                    <p class="mb-0">
+                        <i class="bi bi-code-square me-1"></i>
+                        Site maintained <b>by TritonX Inc.</b></a>
+                    </p>
+                </div>
             </div>
         </footer>
     </div>

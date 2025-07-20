@@ -48,7 +48,6 @@ function setupEventListeners() {
             }
         }
     });
-    
     // Search functionality
     document.getElementById('search-button').addEventListener('click', searchBySymbol);
     document.getElementById('clear-search').addEventListener('click', clearSearch);
