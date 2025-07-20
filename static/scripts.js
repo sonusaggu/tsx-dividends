@@ -2,14 +2,24 @@
 const itemsPerPage = 15;
 let currentPage = 1;
 let currentDaysFilter = null;
+let currentSearchSymbol = null;
 let allStocks = [];
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize event listeners
+    setupEventListeners();
+    
+    // Initial load
+    fetchStocks();
+});
+
+function setupEventListeners() {
     // Timeframe filtering
     document.getElementById('timeframe-buttons').addEventListener('click', function(e) {
         if (e.target.tagName === 'BUTTON') {
             currentDaysFilter = e.target.dataset.days === 'all' ? null : parseInt(e.target.dataset.days);
             currentPage = 1;
+            currentSearchSymbol = null;
             
             // Update active button
             document.querySelectorAll('#timeframe-buttons .btn').forEach(btn => {
@@ -24,9 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Initial load
-    fetchStocks();
-
     // Pagination click handler
     document.getElementById('pagination').addEventListener('click', function(e) {
         if (e.target.classList.contains('page-link')) {
@@ -40,20 +47,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    initializeTooltips();
-});
+    // Search functionality
+    document.getElementById('search-button').addEventListener('click', searchBySymbol);
+    document.getElementById('clear-search').addEventListener('click', clearSearch);
+    document.getElementById('symbol-search').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') searchBySymbol();
+    });
+}
 
 async function fetchStocks(days = null) {
-    if (currentSearchSymbol) {
-        return; // Don't fetch all stocks if we're in search mode
-    }
+    if (currentSearchSymbol) return;
+    
     const spinner = document.getElementById('loading-spinner');
     const errorEl = document.getElementById('error-message');
     const tbody = document.getElementById('stocks-data');
     
     try {
-        // Show loading state
-        spinner.classList.remove('d-none');
+        showLoading(true);
         errorEl.classList.add('d-none');
         tbody.innerHTML = '';
         
@@ -71,11 +81,63 @@ async function fetchStocks(days = null) {
             
     } catch (error) {
         console.error('Error:', error);
-        errorEl.textContent = `Error: ${error.message}`;
-        errorEl.classList.remove('d-none');
+        showError(error.message);
     } finally {
-        spinner.classList.add('d-none');
+        showLoading(false);
     }
+}
+
+async function searchBySymbol() {
+    const symbol = document.getElementById('symbol-search').value.trim().toUpperCase();
+    if (!symbol) {
+        showSearchFeedback('Please enter a stock symbol', 'text-danger');
+        return;
+    }
+
+    currentSearchSymbol = symbol;
+    currentPage = 1;
+    
+    const spinner = document.getElementById('loading-spinner');
+    const feedback = document.getElementById('search-feedback');
+    
+    showLoading(true);
+    feedback.textContent = '';
+    
+    try {
+        const response = await fetch(`/api/search?symbol=${symbol}`);
+        const data = await response.json();
+        
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Failed to fetch search results');
+        }
+        
+        if (data.data.length === 0) {
+            showSearchFeedback(`No dividend information found for ${symbol}`, 'text-warning');
+            renderStocks([]);
+        } else {
+            showSearchFeedback(`Showing results for ${symbol}`, 'text-success');
+            allStocks = data.data;
+            renderStocks(allStocks);
+        }
+        
+        document.getElementById('last-updated').innerHTML = `
+            <i class="bi bi-clock-history"></i> Updated: ${new Date().toLocaleString()}`;
+            
+    } catch (error) {
+        console.error('Search error:', error);
+        showSearchFeedback(error.message, 'text-danger');
+        renderStocks([]);
+    } finally {
+        showLoading(false);
+    }
+}
+
+function clearSearch() {
+    document.getElementById('symbol-search').value = '';
+    document.getElementById('search-feedback').textContent = '';
+    currentSearchSymbol = null;
+    currentPage = 1;
+    fetchStocks(currentDaysFilter);
 }
 
 function renderStocks(stocks) {
@@ -96,47 +158,58 @@ function renderStocks(stocks) {
     // Render stocks
     tbody.innerHTML = paginatedStocks.map(stock => {
         const isHighYield = parseFloat(stock.yield) > 5;
+        const daysUntil = stock.days_until;
+        let daysBadge = '';
+        
+        if (daysUntil !== undefined) {
+            let badgeClass = 'bg-primary';
+            if (daysUntil === 0) badgeClass = 'bg-danger';
+            else if (daysUntil <= 3) badgeClass = 'bg-warning';
+            
+            daysBadge = `<span class="badge ${badgeClass} ms-2">${
+                daysUntil === 0 ? 'Today' : 
+                daysUntil === 1 ? 'Tomorrow' : 
+                `${daysUntil}d`
+            }</span>`;
+        }
+        
         return `
         <tr class="${isHighYield ? 'high-yield' : ''}">
-            <td class="ps-3 fw-bold position-relative">
-                ${stock.code || 'N/A'}
+            <td class="ps-3 fw-bold" data-label="Symbol">
+                <span>${stock.code || 'N/A'}</span>
             </td>
-            <td>${stock.company || 'N/A'}</td>
-            <td>${stock.sector || 'N/A'}</td>
-            <td class="position-relative">
+            <td data-label="Company">
+                <span>${stock.company || 'N/A'}</span>
+            </td>
+            <td data-label="Sector">${stock.sector || 'N/A'}</td>
+            <td data-label="Ex-Date">
                 ${stock.upcoming_date || 'N/A'}
-                ${stock.days_until !== undefined ? `
-                <span class="badge ${
-                    stock.days_until === 0 ? 'bg-danger' :
-                    stock.days_until <= 3 ? 'bg-warning' : 'bg-primary'
-                } ms-2">
-                    ${
-                        stock.days_until === 0 ? 'Today' :
-                        stock.days_until === 1 ? 'Tomorrow' :
-                        `${stock.days_until}d`
-                    }
-                </span>` : ''}
+                ${daysBadge}
             </td>
-            <td>${stock.formatted_pay_date || 'N/A'}</td>
-            <td class="text-end">${stock.last_price || 'N/A'}</td>
-            <td class="text-end position-relative ${isHighYield ? 'text-success fw-bold' : ''}">
+            <td data-label="Pay Date">${stock.formatted_pay_date || 'N/A'}</td>
+            <td class="text-end" data-label="Price">${stock.last_price || 'N/A'}</td>
+            <td class="text-end ${isHighYield ? 'text-success fw-bold' : ''}" data-label="Yield">
                 ${stock.yield || 'N/A'}
             </td>
-            <td class="text-end">${stock.dividend_currency || ''} ${stock.dividend || 'N/A'}</td>
-            <td>${stock.payout_frequency || 'N/A'}</td>
+            <td class="text-end" data-label="Amount">
+                ${stock.dividend_currency || ''} ${stock.dividend || 'N/A'}
+            </td>
+            <td data-label="Frequency">${stock.payout_frequency || 'N/A'}</td>
         </tr>
         `;
     }).join('');
     
     // Render pagination
     renderPagination(totalPages);
-    
-    // Animate rows
-    animateTableRows();
 }
 
 function renderPagination(totalPages) {
     const pagination = document.getElementById('pagination');
+    if (totalPages <= 1) {
+        pagination.innerHTML = '';
+        return;
+    }
+    
     pagination.innerHTML = '';
     
     // Previous button
@@ -193,87 +266,14 @@ function renderPagination(totalPages) {
     `;
 }
 
-function initializeTooltips() {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+function showLoading(show) {
+    document.getElementById('loading-spinner').classList.toggle('d-none', !show);
 }
 
-function animateTableRows() {
-    const rows = document.querySelectorAll('#stocks-data tr');
-    rows.forEach((row, index) => {
-        row.style.opacity = '0';
-        row.style.transform = 'translateY(20px)';
-        row.style.transition = `all 0.3s ease ${index * 0.05}s`;
-        
-        setTimeout(() => {
-            row.style.opacity = '1';
-            row.style.transform = 'translateY(0)';
-        }, 50);
-    });
-}
-
-// Add these at the top with your other variables
-let currentSearchSymbol = null;
-
-// Add this event listener with your other DOM listeners
-document.getElementById('search-button').addEventListener('click', searchBySymbol);
-document.getElementById('clear-search').addEventListener('click', clearSearch);
-document.getElementById('symbol-search').addEventListener('keyup', function(e) {
-    if (e.key === 'Enter') {
-        searchBySymbol();
-    }
-});
-
-// Add these new functions
-function searchBySymbol() {
-    const symbol = document.getElementById('symbol-search').value.trim().toUpperCase();
-    if (!symbol) {
-        showSearchFeedback('Please enter a stock symbol', 'text-danger');
-        return;
-    }
-
-    currentSearchSymbol = symbol;
-    currentPage = 1;
-    
-    const spinner = document.getElementById('loading-spinner');
-    const feedback = document.getElementById('search-feedback');
-    
-    spinner.classList.remove('d-none');
-    feedback.textContent = '';
-    
-    fetch(`/api/search?symbol=${symbol}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                if (data.data.length === 0) {
-                    showSearchFeedback(`No dividend information found for ${symbol}`, 'text-warning');
-                    renderStocks([]);
-                } else {
-                    showSearchFeedback(`Showing results for ${symbol}`, 'text-success');
-                    renderStocks(data.data);
-                }
-            } else {
-                showSearchFeedback(data.message, 'text-danger');
-                renderStocks([]);
-            }
-        })
-        .catch(error => {
-            showSearchFeedback('Error searching for symbol', 'text-danger');
-            console.error('Search error:', error);
-        })
-        .finally(() => {
-            spinner.classList.add('d-none');
-        });
-}
-
-function clearSearch() {
-    document.getElementById('symbol-search').value = '';
-    document.getElementById('search-feedback').textContent = '';
-    currentSearchSymbol = null;
-    currentPage = 1;
-    fetchStocks(currentDaysFilter);
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = message;
+    errorDiv.classList.remove('d-none');
 }
 
 function showSearchFeedback(message, className) {

@@ -41,31 +41,33 @@
                     <div class="row justify-content-center g-3">
                         <!-- Timeframe Navigation -->
                         <div class="col-12 col-md-auto text-center">
-                            <div class="btn-group" role="group" id="timeframe-buttons">
-                                <button class="btn btn-outline-primary active" data-days="all">All</button>
-                                <button class="btn btn-outline-primary" data-days="1">Tomorrow</button>
-                                <button class="btn btn-outline-primary" data-days="10">10 Days</button>
-                                <button class="btn btn-outline-primary" data-days="30">30 Days</button>
-                                <button class="btn btn-outline-primary" data-days="60">60 Days</button>
+                            <div class="btn-group flex-wrap" role="group" id="timeframe-buttons">
+                                <button class="btn btn-outline-primary btn-sm active" data-days="all">All</button>
+                                <button class="btn btn-outline-primary btn-sm" data-days="1">1D</button>
+                                <button class="btn btn-outline-primary btn-sm" data-days="10">10D</button>
+                                <button class="btn btn-outline-primary btn-sm" data-days="30">30D</button>
+                                <button class="btn btn-outline-primary btn-sm" data-days="60">60D</button>
                             </div>
                         </div>
                         
                         <!-- Search Bar -->
                         <div class="col-12 col-md-8 text-center">
-                            <div class="input-group shadow-sm mx-auto" style="max-width: 500px;">
+                            <div class="input-group shadow-sm mx-auto" style="max-width: 100%;">
                                 <input type="text" 
                                        class="form-control" 
                                        id="symbol-search" 
-                                       placeholder="symbol (e.g., CNR, TD)"
+                                       placeholder="Search symbol..."
                                        aria-label="Stock symbol search">
                                 <button class="btn btn-primary" type="button" id="search-button">
-                                    <i class="bi bi-search me-1"></i> Search
+                                    <i class="bi bi-search me-1"></i>
+                                    <span class="d-none d-sm-inline">Search</span>
                                 </button>
                                 <button class="btn btn-outline-secondary" type="button" id="clear-search">
-                                    Clear
+                                    <span class="d-none d-sm-inline">Clear</span>
+                                    <i class="bi bi-x d-sm-none"></i>
                                 </button>
                             </div>
-                            <div id="search-feedback" class="text-center mt-2 small text-muted"></div>
+                            <div id="search-feedback" class="text-center mt-2 small"></div>
                         </div>
                     </div>
                 </div>
@@ -119,15 +121,15 @@
                         <table class="table table-hover mb-0" id="stocks-table">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="ps-3">Symbol</th>
-                                    <th>Company</th>
-                                    <th>Sector</th>
-                                    <th>Ex-Date</th>
-                                    <th>Payable Date</th>
-                                    <th class="text-end">Price</th>
-                                    <th class="text-end">Yield</th>
-                                    <th class="text-end">Amount</th>
-                                    <th>Frequency</th>
+                                    <th class="ps-3 symbol-col">Symbol</th>
+                                    <th class="company-col">Company</th>
+                                    <th class="sector-col">Sector</th>
+                                    <th class="ex-date-col">Ex-Date</th>
+                                    <th class="pay-date-col">Pay Date</th>
+                                    <th class="text-end price-col">Price</th>
+                                    <th class="text-end yield-col">Yield</th>
+                                    <th class="text-end amount-col">Amount</th>
+                                    <th class="freq-col">Freq</th>
                                 </tr>
                             </thead>
                             <tbody id="stocks-data">
