@@ -1,66 +1,214 @@
-/* Modern table styling */
+/* ============ BASE STYLES ============ */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* ============ HEADER STYLES ============ */
+.display-5 {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.5rem;
+}
+
+/* ============ CARD & TABLE STYLES ============ */
+.card {
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+}
+
 #stocks-table {
     --bs-table-bg: transparent;
-    font-size: 0.925rem;
+    font-size: 0.875rem;
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
 }
+
 #stocks-table th {
     font-weight: 500;
     text-transform: uppercase;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     letter-spacing: 0.5px;
+    white-space: nowrap;
+    border-bottom: 2px solid #e9ecef;
+    padding: 1rem 0.75rem;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
 }
 
-/* Highlight high-yield stocks */
-.high-yield {
-    background-color: rgba(25, 135, 84, 0.05) !important;
+#stocks-table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 52px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: inherit;
 }
+
+/* ============ HIGH-YIELD STYLES ============ */
+/* Fix for high-yield row alignment */
+.high-yield td {
+    position: relative;
+    background-color: inherit !important;
+}
+
 .high-yield td:first-child {
-    border-left: 3px solid #198754;
+    padding-left: 1.75rem !important; /* Make room for the star */
+    position: relative;
 }
 
-/* Hover effects */
-.stock-row:hover {
-    background-color: #f8f9fa !important;
+.high-yield td:first-child::before {
+    content: "★";
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #198754;
+    font-size: 0.8em;
+    z-index: 2;
 }
 
-/* Status badges */
-.badge-ex-date {
-    font-size: 0.75em;
+/* Ensure consistent cell alignment */
+#stocks-table td {
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0.75rem;
+    height: 52px; /* Fixed height for all rows */
+    box-sizing: border-box;
+}
+
+/* Fix for badge alignment */
+.badge {
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1.2;
+}
+/* ============ BADGE STYLES ============ */
+.badge {
+    font-weight: 500;
     padding: 0.35em 0.65em;
-}
-.badge-ex-date.today {
-    background-color: #dc3545;
-}
-.badge-ex-date.soon {
-    background-color: #fd7e14;
-}
-.badge-ex-date.future {
-    background-color: #0dcaf0;
+    font-size: 0.75em;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    line-height: 1.2;
 }
 
-/* Responsive tweaks */
-@media (max-width: 768px) {
-    #stocks-table td:nth-child(2),
-    #stocks-table th:nth-child(2) {
-        display: none;
-    }
-}
-/* Ensure table remains responsive */
-@media (max-width: 992px) {
-    #stocks-table th:nth-child(3), /* Sector */
-    #stocks-table td:nth-child(3),
-    #stocks-table th:nth-child(6), /* Frequency */
-    #stocks-table td:nth-child(6) {
-        display: none;
-    }
+.bg-primary { background-color: #0d6efd !important; }
+.bg-warning { background-color: #fd7e14 !important; }
+.bg-danger { background-color: #dc3545 !important; }
+
+/* ============ TABLE INTERACTION ============ */
+.table tbody tr {
+    transition: all 0.2s ease;
+    position: relative;
 }
 
-/* Numeric columns alignment */
-.text-end {
-    text-align: right !important;
-    padding-right: 1.5rem !important;
+.table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
-.btn-timeframe.active {
+
+/* ============ PAGINATION STYLES ============ */
+.pagination {
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+}
+
+.page-link {
+    border: none;
+    color: #495057;
+    font-weight: 500;
+    margin: 0 3px;
+    border-radius: 8px !important;
+    min-width: 32px;
+    text-align: center;
+    padding: 0.375rem 0.75rem;
+}
+
+.page-item.active .page-link {
     background-color: #0d6efd;
-    color: white !important;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
 }
+
+/* ============ LOADING & ERROR STATES ============ */
+#loading-spinner {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+#error-message {
+    display: none;
+}
+
+/* ============ RESPONSIVE ADJUSTMENTS ============ */
+@media (max-width: 768px) {
+    .display-5 {
+        font-size: 2rem;
+    }
+    
+    #stocks-table th:nth-child(2),
+    #stocks-table td:nth-child(2),
+    #stocks-table th:nth-child(3),
+    #stocks-table td:nth-child(3),
+    #stocks-table th:nth-child(9),
+    #stocks-table td:nth-child(9) {
+        display: none;
+    }
+    
+    #stocks-table th,
+    #stocks-table td {
+        padding: 0.5rem;
+    }
+    
+    .high-yield td:first-child {
+        padding-left: 1.5rem !important;
+    }
+    
+    .high-yield td:first-child::before {
+        left: 0.5rem;
+    }
+}
+
+/* ============ COLUMN WIDTHS ============ */
+#stocks-table th:nth-child(1),
+#stocks-table td:nth-child(1) { width: 8%; min-width: 80px; }
+#stocks-table th:nth-child(2),
+#stocks-table td:nth-child(2) { width: 20%; min-width: 150px; }
+#stocks-table th:nth-child(3),
+#stocks-table td:nth-child(3) { width: 12%; min-width: 100px; }
+#stocks-table th:nth-child(4),
+#stocks-table td:nth-child(4) { width: 12%; min-width: 110px; }
+#stocks-table th:nth-child(5),
+#stocks-table td:nth-child(5) { width: 12%; min-width: 110px; }
+#stocks-table th:nth-child(6),
+#stocks-table td:nth-child(6) { width: 8%; min-width: 80px; }
+#stocks-table th:nth-child(7),
+#stocks-table td:nth-child(7) { width: 8%; min-width: 80px; }
+#stocks-table th:nth-child(8),
+#stocks-table td:nth-child(8) { width: 10%; min-width: 90px; }
+#stocks-table th:nth-child(9),
+#stocks-table td:nth-child(9) { width: 10%; min-width: 90px; }

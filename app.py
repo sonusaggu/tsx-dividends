@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template,send_from_directory
 import requests
 from datetime import datetime
 from functools import lru_cache
@@ -25,6 +25,14 @@ def get_cached_stocks():
 @app.route('/')
 def home():
     return render_template('index.html')
+
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('static', filename)
+
+@app.route('/test-css')
+def test_css():
+    return send_from_directory('static', 'styles.css')
 
 @app.route('/api/stocks')
 def api_stocks():
