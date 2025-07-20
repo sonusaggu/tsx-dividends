@@ -1,10 +1,11 @@
 from flask import Flask, jsonify, request, render_template, send_from_directory
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import lru_cache
 import os
 from flask_cors import CORS
 import logging
+import pytz
 
 app = Flask(__name__)
 CORS(app)
@@ -13,14 +14,22 @@ CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Set your preferred timezone
+TZ = pytz.timezone('America/Toronto')  # Change to your preferred timezone
+
 def format_date(date_str):
     """Safely format dates from YYYY-MM-DD to Month Day, Year"""
     if not date_str:
         return "N/A"
     try:
-        return datetime.strptime(date_str, "%Y-%m-%d").strftime("%b %d, %Y")
+        dt = datetime.strptime(date_str, "%Y-%m-%d")
+        return dt.strftime("%b %d, %Y")
     except ValueError:
         return "Invalid Date"
+
+def get_current_time():
+    """Get current time in the specified timezone"""
+    return datetime.now(timezone.utc).astimezone(TZ)
 
 @lru_cache(maxsize=1)
 def get_cached_stocks():
@@ -31,25 +40,23 @@ def get_cached_stocks():
 def home():
     return render_template('index.html')
 
+# Make sure this points to your actual static files directory
 @app.route('/static/<path:filename>')
 def static_files(filename):
-    return send_from_directory('static', filename)
-
-@app.route('/test-css')
-def test_css():
-    return send_from_directory('static', 'styles.css')
+    return send_from_directory(os.path.join(app.root_path, 'static'), filename)
 
 @app.route('/api/stocks')
 def api_stocks():
     try:
         days = request.args.get('days', type=int)
         stocks = get_cached_stocks()
-        today = datetime.now()
+        today = get_current_time()  # Use timezone-aware datetime
         filtered_stocks = []
         
         for stock in stocks:
             try:
                 ex_date = datetime.strptime(stock['dividend_date'], "%Y-%m-%d")
+                ex_date = TZ.localize(ex_date)  # Make timezone-aware
                 days_until = (ex_date - today).days
                 
                 if not days or (0 <= days_until <= days):
@@ -66,11 +73,15 @@ def api_stocks():
         return jsonify({
             "success": True,
             "data": filtered_stocks,
-            "updated": datetime.now().strftime("%Y-%m-%d %H:%M")
+            "updated": get_current_time().strftime("%Y-%m-%d %H:%M")
         })
     except Exception as e:
         logger.error(f"Error in api_stocks: {str(e)}")
         return jsonify({"success": False, "message": str(e)}), 500
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
 
 @app.route('/api/search')
 def api_search():
