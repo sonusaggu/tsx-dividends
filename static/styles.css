@@ -212,3 +212,24 @@ body {
 #stocks-table td:nth-child(8) { width: 10%; min-width: 90px; }
 #stocks-table th:nth-child(9),
 #stocks-table td:nth-child(9) { width: 10%; min-width: 90px; }
+
+/* Add to your styles.css */
+#symbol-search {
+    max-width: 200px;
+}
+
+#search-feedback {
+    min-height: 24px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    #symbol-search {
+        max-width: none;
+    }
+    
+    .input-group > .btn {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}

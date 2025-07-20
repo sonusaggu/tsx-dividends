@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function fetchStocks(days = null) {
+    if (currentSearchSymbol) {
+        return; // Don't fetch all stocks if we're in search mode
+    }
     const spinner = document.getElementById('loading-spinner');
     const errorEl = document.getElementById('error-message');
     const tbody = document.getElementById('stocks-data');
@@ -209,4 +212,72 @@ function animateTableRows() {
             row.style.transform = 'translateY(0)';
         }, 50);
     });
+}
+
+// Add these at the top with your other variables
+let currentSearchSymbol = null;
+
+// Add this event listener with your other DOM listeners
+document.getElementById('search-button').addEventListener('click', searchBySymbol);
+document.getElementById('clear-search').addEventListener('click', clearSearch);
+document.getElementById('symbol-search').addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') {
+        searchBySymbol();
+    }
+});
+
+// Add these new functions
+function searchBySymbol() {
+    const symbol = document.getElementById('symbol-search').value.trim().toUpperCase();
+    if (!symbol) {
+        showSearchFeedback('Please enter a stock symbol', 'text-danger');
+        return;
+    }
+
+    currentSearchSymbol = symbol;
+    currentPage = 1;
+    
+    const spinner = document.getElementById('loading-spinner');
+    const feedback = document.getElementById('search-feedback');
+    
+    spinner.classList.remove('d-none');
+    feedback.textContent = '';
+    
+    fetch(`/api/search?symbol=${symbol}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.data.length === 0) {
+                    showSearchFeedback(`No dividend information found for ${symbol}`, 'text-warning');
+                    renderStocks([]);
+                } else {
+                    showSearchFeedback(`Showing results for ${symbol}`, 'text-success');
+                    renderStocks(data.data);
+                }
+            } else {
+                showSearchFeedback(data.message, 'text-danger');
+                renderStocks([]);
+            }
+        })
+        .catch(error => {
+            showSearchFeedback('Error searching for symbol', 'text-danger');
+            console.error('Search error:', error);
+        })
+        .finally(() => {
+            spinner.classList.add('d-none');
+        });
+}
+
+function clearSearch() {
+    document.getElementById('symbol-search').value = '';
+    document.getElementById('search-feedback').textContent = '';
+    currentSearchSymbol = null;
+    currentPage = 1;
+    fetchStocks(currentDaysFilter);
+}
+
+function showSearchFeedback(message, className) {
+    const feedback = document.getElementById('search-feedback');
+    feedback.textContent = message;
+    feedback.className = `text-center mt-2 small ${className}`;
 }
