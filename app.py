@@ -15,7 +15,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Set your preferred timezone
-TZ = pytz.timezone('America/Toronto')  # Change to your preferred timezone
+TZ = pytz.timezone('America/Toronto') 
+
+def get_toronto_time():
+    """Returns current time in Toronto (ET)"""
+    return datetime.now(TZ)
+
 
 def format_date(date_str):
     """Safely format dates from YYYY-MM-DD to Month Day, Year"""
@@ -56,7 +61,9 @@ def api_stocks():
         for stock in stocks:
             try:
                 ex_date = datetime.strptime(stock['dividend_date'], "%Y-%m-%d")
-                ex_date = TZ.localize(ex_date)  # Make timezone-aware
+                ex_date = TZ.localize(ex_date)  # Dividend date at midnight Toronto time
+
+                today = get_toronto_time().replace(hour=0, minute=0, second=0, microsecond=0)
                 days_until = (ex_date - today).days
                 
                 if not days or (0 <= days_until <= days):
