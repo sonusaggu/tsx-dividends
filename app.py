@@ -217,7 +217,7 @@ class TSXScraper:
                 
             response = self.session.post(
                 f"{self.base_url}/stocks/",
-                data={"term": symbol, "csrf": csrf_token},
+                data={"symbol": symbol, "csrf": csrf_token},
                 timeout=15
             )
             
