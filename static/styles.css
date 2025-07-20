@@ -45,3 +45,22 @@
         display: none;
     }
 }
+/* Ensure table remains responsive */
+@media (max-width: 992px) {
+    #stocks-table th:nth-child(3), /* Sector */
+    #stocks-table td:nth-child(3),
+    #stocks-table th:nth-child(6), /* Frequency */
+    #stocks-table td:nth-child(6) {
+        display: none;
+    }
+}
+
+/* Numeric columns alignment */
+.text-end {
+    text-align: right !important;
+    padding-right: 1.5rem !important;
+}
+.btn-timeframe.active {
+    background-color: #0d6efd;
+    color: white !important;
+}

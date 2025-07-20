@@ -1,46 +1,54 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
+    // Timeframe filtering
+    document.getElementById('timeframe-buttons').addEventListener('click', function(e) {
+        if (e.target.tagName === 'BUTTON') {
+            const days = e.target.dataset.days === 'all' ? null : parseInt(e.target.dataset.days);
+            
+            // Update active button
+            document.querySelectorAll('#timeframe-buttons .btn').forEach(btn => {
+                btn.classList.toggle('active', btn === e.target);
+            });
+            
+            // Update title
+            document.getElementById('timeframe-title').textContent = 
+                `${e.target.textContent} Dividend Stocks`;
+            
+            fetchStocks(days);
+        }
+    });
+
     // Initial load
     fetchStocks();
-
-    // Refresh button
-    document.getElementById('refresh-btn').addEventListener('click', () => {
-        fetchStocks(true); // Force refresh
-    });
 });
 
-async function fetchStocks(forceRefresh = false) {
+async function fetchStocks(days = null) {
+    const spinner = document.getElementById('loading-spinner');
+    const errorEl = document.getElementById('error-message');
     const tbody = document.getElementById('stocks-data');
-    const refreshBtn = document.getElementById('refresh-btn');
     
     try {
         // Show loading state
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </td>
-            </tr>`;
+        spinner.classList.remove('d-none');
+        errorEl.classList.add('d-none');
+        tbody.innerHTML = '';
         
-        refreshBtn.disabled = true;
-        refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refreshing...';
-
-        // API call
-        const response = await fetch(`/api/stocks?force=${forceRefresh ? '1' : '0'}`);
+        const response = await fetch(`/api/stocks${days ? `?days=${days}` : ''}`);
         const data = await response.json();
-
-        if (data.success) {
-            renderStocks(data.data);
-            updateMetadata(data.updated);
-        } else {
-            showError("Failed to load data. Please try later.");
+        
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Failed to fetch data');
         }
+        
+        renderStocks(data.data);
+        document.getElementById('last-updated').innerHTML = `
+            <i class="bi bi-clock-history"></i> Updated: ${data.updated}`;
+            
     } catch (error) {
-        showError("Network error. Check your connection.");
+        console.error('Error:', error);
+        errorEl.textContent = `Error: ${error.message}`;
+        errorEl.classList.remove('d-none');
     } finally {
-        refreshBtn.disabled = false;
-        refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refresh Data';
+        spinner.classList.add('d-none');
     }
 }
 
@@ -48,59 +56,36 @@ function renderStocks(stocks) {
     const tbody = document.getElementById('stocks-data');
     
     if (!stocks || stocks.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-center py-4 text-muted">
-                    No upcoming dividends found
-                </td>
-            </tr>`;
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4">No dividends found</td></tr>';
         return;
     }
-
+    
     tbody.innerHTML = stocks.map(stock => `
-        <tr class="stock-row ${stock.yield > 5 ? 'high-yield' : ''}">
-            <td class="ps-4 fw-bold">${stock.code}</td>
-            <td>${stock.company}</td>
+        <tr class="${parseFloat(stock.yield) > 5 ? 'high-yield' : ''}">
+            <td class="ps-4 fw-bold">${stock.code || 'N/A'}</td>
+            <td>${stock.company || 'N/A'}</td>
+            <td>${stock.sector || 'N/A'}</td>
             <td>
-                ${stock.upcoming_date}
-                <span class="badge rounded-pill badge-ex-date 
-                    ${stock.days_until === 0 ? 'today' : 
-                      stock.days_until <= 3 ? 'soon' : 'future'} ms-2">
-                    ${stock.days_until === 0 ? 'Today' : 
-                     stock.days_until === 1 ? 'Tomorrow' : 
-                     `${stock.days_until}d`}
-                </span>
+                ${stock.upcoming_date || 'N/A'}
+                ${stock.days_until !== undefined ? `
+                <span class="badge ${
+                    stock.days_until === 0 ? 'bg-danger' :
+                    stock.days_until <= 3 ? 'bg-warning' : 'bg-primary'
+                } ms-2">
+                    ${
+                        stock.days_until === 0 ? 'Today' :
+                        stock.days_until === 1 ? 'Tomorrow' :
+                        `${stock.days_until}d`
+                    }
+                </span>` : ''}
             </td>
-            <td class="text-end ${stock.yield > 5 ? 'text-success fw-bold' : ''}">
-                ${stock.yield}%
+            <td>${stock.formatted_pay_date || 'N/A'}</td>
+            <td class="text-end">${stock.last_price || 'N/A'}</td>
+            <td class="text-end ${parseFloat(stock.yield) > 5 ? 'text-success fw-bold' : ''}">
+                ${stock.yield || 'N/A'}
             </td>
-            <td class="text-end">
-                ${stock.dividend_currency} ${stock.dividend}
-            </td>
-            <td>${stock.payout_frequency}</td>
-            <td class="pe-4">
-                <button class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-bell"></i> Alert
-                </button>
-            </td>
+            <td class="text-end">${stock.dividend_currency || ''} ${stock.dividend || 'N/A'}</td>
+            <td>${stock.payout_frequency || 'N/A'}</td>
         </tr>
     `).join('');
-}
-
-function updateMetadata(timestamp) {
-    document.getElementById('last-updated').innerHTML = `
-        <i class="bi bi-clock-history"></i> Updated: ${timestamp}`;
-    
-    document.getElementById('data-source-time').textContent = 
-        new Date().toLocaleTimeString();
-}
-
-function showError(message) {
-    const tbody = document.getElementById('stocks-data');
-    tbody.innerHTML = `
-        <tr>
-            <td colspan="7" class="text-center py-4 text-danger">
-                <i class="bi bi-exclamation-triangle"></i> ${message}
-            </td>
-        </tr>`;
 }

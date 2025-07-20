@@ -1,35 +1,62 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, request, render_template
 import requests
 from datetime import datetime
 from functools import lru_cache
 import os
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
-# Cache API results for 1 hour
+def format_date(date_str):
+    """Safely format dates from YYYY-MM-DD to Month Day, Year"""
+    if not date_str:
+        return "N/A"
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d").strftime("%b %d, %Y")
+    except ValueError:
+        return "Invalid Date"
+
 @lru_cache(maxsize=1)
 def get_cached_stocks():
     scraper = TSXScraper()
-    return scraper.get_stocks(days=10) or []
-
-@app.route('/static/<path:filename>')
-def static_files(filename):
-    return send_from_directory('static', filename)
+    return scraper.get_stocks(days=60) or []  # Cache 60 days by default
 
 @app.route('/')
 def home():
-    stocks = get_cached_stocks()
-    return render_template('index.html', stocks=stocks)
+    return render_template('index.html')
 
 @app.route('/api/stocks')
 def api_stocks():
-    stocks = get_cached_stocks()
-    return jsonify({
-        "success": True,
-        "data": stocks,
-        "updated": datetime.now().strftime("%Y-%m-%d %H:%M")
-    })
-
+    try:
+        days = request.args.get('days', type=int)
+        stocks = get_cached_stocks()
+        today = datetime.now()
+        filtered_stocks = []
+        
+        for stock in stocks:
+            try:
+                ex_date = datetime.strptime(stock['dividend_date'], "%Y-%m-%d")
+                days_until = (ex_date - today).days
+                
+                if not days or (0 <= days_until <= days):
+                    filtered_stocks.append({
+                        **stock,
+                        'upcoming_date': format_date(stock['dividend_date']),
+                        'formatted_pay_date': format_date(stock['dividend_payable_date']),
+                        'days_until': days_until
+                    })
+            except (ValueError, KeyError):
+                continue
+                
+        return jsonify({
+            "success": True,
+            "data": filtered_stocks,
+            "updated": datetime.now().strftime("%Y-%m-%d %H:%M")
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+   
 class TSXScraper:
     def __init__(self):
         self.session = requests.Session()
