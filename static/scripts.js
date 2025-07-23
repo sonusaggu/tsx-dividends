@@ -74,6 +74,9 @@ function setupEventListeners() {
     });
 }
 
+/**
+ * Fetch stocks with optional days filter
+ */
 async function fetchStocks(days = null) {
     if (currentSearchSymbol) return;
 
@@ -95,7 +98,7 @@ async function fetchStocks(days = null) {
 
         allStocks = data.data;
         updateSectorTags(allStocks);
-        filterAndRenderStocks();
+        filterAndRenderStocks(true);  // true = exclude past dividends
 
         document.getElementById('last-updated').innerHTML = `
             <i class="bi bi-clock-history"></i> Updated: ${data.updated}`;
@@ -107,13 +110,19 @@ async function fetchStocks(days = null) {
     }
 }
 
-function filterAndRenderStocks() {
+/**
+ * Filter and render stocks.
+ * @param {boolean} excludePast - If true, filter out negative days_until. Defaults to true.
+ */
+function filterAndRenderStocks(excludePast = true) {
     let filteredStocks = [...allStocks];
 
-    // ✅ Show only today's and upcoming dividend stocks
-    filteredStocks = filteredStocks.filter(stock =>
-        typeof stock.days_until === 'number' && stock.days_until >= 0
-    );
+    if (excludePast) {
+        // Show only today's and upcoming dividend stocks
+        filteredStocks = filteredStocks.filter(stock =>
+            typeof stock.days_until === 'number' && stock.days_until >= 0
+        );
+    } // else: show all, including past dividends (for search)
 
     if (currentSectorFilter) {
         filteredStocks = filteredStocks.filter(stock =>
@@ -162,6 +171,7 @@ async function searchBySymbol() {
 
     currentSearchSymbol = symbol;
     currentPage = 1;
+    currentDaysFilter = null;     // reset timeframe filter on search
     currentSectorFilter = null;
     currentHighYieldFilter = false;
     document.getElementById('high-yield-filter').classList.remove('active');
@@ -185,7 +195,7 @@ async function searchBySymbol() {
             showSearchFeedback(`Showing results for ${symbol}`, 'text-success');
             allStocks = data.data;
             updateSectorTags(allStocks);
-            filterAndRenderStocks(); // ✅ Filter after search
+            filterAndRenderStocks(false);  // Show all including past dividends for search
         }
 
         document.getElementById('last-updated').innerHTML = `
@@ -203,6 +213,7 @@ function clearSearch() {
     document.getElementById('symbol-search').value = '';
     document.getElementById('search-feedback').textContent = '';
     currentSearchSymbol = null;
+    currentDaysFilter = null;
     currentSectorFilter = null;
     currentHighYieldFilter = false;
     document.getElementById('high-yield-filter').classList.remove('active');
@@ -232,7 +243,7 @@ function renderStocks(stocks) {
         if (daysUntil !== undefined) {
             let badgeClass = 'bg-primary';
             if (daysUntil === 0) badgeClass = 'bg-danger';
-            else if (daysUntil <= 3) badgeClass = 'bg-warning';
+            else if (daysUntil <= 3 && daysUntil > 0) badgeClass = 'bg-warning';
 
             daysBadge = `<span class="badge ${badgeClass} ms-2">${
                 daysUntil === 0 ? 'Today' :
