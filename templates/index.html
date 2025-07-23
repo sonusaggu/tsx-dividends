@@ -1,31 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="google-adsense-account" content="ca-pub-1508109246096690">
-    <meta name="google-site-verification" content="KMUJp7ARNYzoPKq369Ld19KnejwlEwXdOXSqTckfVW8" />
-    <meta name="coinzilla" content="4eaf9ca960c3b9a4e7398bfe288d3262" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Track upcoming dividend payments for TSX-listed stocks with real-time updates">
-    <meta name="keywords" content="TSX dividends, Canadian stocks, dividend tracker, stock dividends, ex-dividend dates">
-    <title>TSX Dividend Tracker | Upcoming Canadian Stock Dividends</title>
-    <link rel="canonical" href="https://dividend.forum/" />
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
+        <!-- Search Engine Verification -->
+        <meta name="google-site-verification" content="KMUJp7ARNYzoPKq369Ld19KnejwlEwXdOXSqTckfVW8" />
+        <meta name="coinzilla" content="4eaf9ca960c3b9a4e7398bfe288d3262" />
+        <meta name="google-adsense-account" content="ca-pub-1508109246096690">
     
-    <!-- Favicon -->
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
-    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+        <!-- SEO: Title + Description -->
+        <title>TSX Dividend Tracker | Upcoming Canadian Stock Dividends</title>
+        <meta name="description" content="Track upcoming ex-dividend dates, pay dates, and high-yield Canadian dividend stocks on the TSX. Real-time updates, sector filters, and yield-based screening.">
+        
+        <!-- Keywords -->
+        <meta name="keywords" content="TSX dividends, Canadian dividend stocks, dividend tracker, ex-dividend dates, stock dividends, TSX ex-dividend, TSX high yield, Canadian income stocks, dividend investing Canada, passive income stocks, dividend calendar TSX, dividend growth, dividend screen, dividend watchlist">
     
-    <!-- CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
+        <link rel="canonical" href="https://dividend.forum/" />
+    
+        <!-- Open Graph (for Facebook & LinkedIn) -->
+        <meta property="og:title" content="TSX Dividend Tracker | Upcoming Canadian Stock Dividends">
+        <meta property="og:description" content="Monitor upcoming TSX ex-dividend dates, payout yields, and dividend income opportunities. Ideal for Canadian income investors.">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://dividend.forum/">
+        <meta property="og:image" content="{{ url_for('static', filename='og-image.jpg', _external=True) }}">
+        
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="TSX Dividend Tracker">
+        <meta name="twitter:description" content="Track ex-dividend dates and high-yield Canadian stocks. A free dividend calendar for TSX investors.">
+        <meta name="twitter:image" content="{{ url_for('static', filename='og-image.jpg', _external=True) }}">
+        <meta name="twitter:site" content="@YourTwitterHandle"> <!-- Replace if applicable -->
+    
+        <!-- JSON-LD Schema (Google Rich Snippets) -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "TSX Dividend Tracker",
+            "url": "https://dividend.forum/",
+            "description": "A free dividend calendar to track ex-dividend dates, yields, and payout frequencies for Canadian stocks on the TSX.",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://dividend.forum/search?symbol={search_term_string}",
+                "query-input": "required name=search_term_string"
+            }
+        }
+        </script>
+    
+        <!-- Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
+    
+        <!-- Favicon -->
+        <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+        <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    
+        <!-- CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
+    
 <body>
     <div class="container-fluid py-3">
         <!-- Header Section -->
