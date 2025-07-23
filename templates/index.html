@@ -3,43 +3,56 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-        <!-- Search Engine Verification -->
+
         <meta name="google-site-verification" content="KMUJp7ARNYzoPKq369Ld19KnejwlEwXdOXSqTckfVW8" />
         <meta name="coinzilla" content="4eaf9ca960c3b9a4e7398bfe288d3262" />
         <meta name="google-adsense-account" content="ca-pub-1508109246096690">
-    
-        <!-- SEO: Title + Description -->
-        <title>TSX Dividend Tracker | Upcoming Canadian Stock Dividends</title>
-        <meta name="description" content="Track upcoming ex-dividend dates, pay dates, and high-yield Canadian dividend stocks on the TSX. Real-time updates, sector filters, and yield-based screening.">
+
+        <title>TSX Dividend Tracker | Upcoming Ex-Dividend Dates & High-Yield Stocks (2024)</title>
+        <meta name="description" content="Free real-time tracker for TSX dividend stocks: ex-dividend dates, payout yields (up to 10%), and payment calendars. Ideal for Canadian passive income investors.">
         
-        <!-- Keywords -->
-        <meta name="keywords" content="TSX dividends, Canadian dividend stocks, dividend tracker, ex-dividend dates, stock dividends, TSX ex-dividend, TSX high yield, Canadian income stocks, dividend investing Canada, passive income stocks, dividend calendar TSX, dividend growth, dividend screen, dividend watchlist">
+        <meta name="keywords" content="
+            TSX dividends, 
+            Canadian dividend stocks, 
+            TSX ex-dividend dates 2024, 
+            high-yield stocks Canada, 
+            Toronto Stock Exchange dividends, 
+            dividend calendar TSX, 
+            passive income Canada, 
+            best dividend stocks TSX, 
+            monthly dividend stocks Canada, 
+            dividend reinvestment TSX,
+            Canadian REITs dividends,
+            TSX dividend aristocrats,
+            dividend growth stocks,
+            TSX stock screener,
+            dividend tax Canada
+        ">
     
         <link rel="canonical" href="https://dividend.forum/" />
     
-        <!-- Open Graph (for Facebook & LinkedIn) -->
-        <meta property="og:title" content="TSX Dividend Tracker | Upcoming Canadian Stock Dividends">
-        <meta property="og:description" content="Monitor upcoming TSX ex-dividend dates, payout yields, and dividend income opportunities. Ideal for Canadian income investors.">
+        <!-- Open Graph (Social Sharing) -->
+        <meta property="og:title" content="TSX Dividend Tracker: Upcoming Ex-Dividend Dates & Yields">
+        <meta property="og:description" content="Track 300+ TSX-listed dividend stocks. Get alerts for ex-dividend dates, payout amounts, and high-yield opportunities (5%+).">
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://dividend.forum/">
         <meta property="og:image" content="{{ url_for('static', filename='og-image.jpg', _external=True) }}">
+        <meta property="og:site_name" content="TSX Dividend Tracker">
         
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="TSX Dividend Tracker">
-        <meta name="twitter:description" content="Track ex-dividend dates and high-yield Canadian stocks. A free dividend calendar for TSX investors.">
+        <meta name="twitter:title" content="Free TSX Dividend Calendar | Ex-Dates & Yields">
+        <meta name="twitter:description" content="Real-time tracker for Canadian dividend stocks on the TSX. Filter by yield, sector, and payment dates.">
         <meta name="twitter:image" content="{{ url_for('static', filename='og-image.jpg', _external=True) }}">
-        <meta name="twitter:site" content="@YourTwitterHandle"> <!-- Replace if applicable -->
+        <meta name="twitter:site" content="@YourTwitterHandle">
     
-        <!-- JSON-LD Schema (Google Rich Snippets) -->
         <script type="application/ld+json">
         {
             "@context": "https://schema.org",
             "@type": "WebSite",
             "name": "TSX Dividend Tracker",
             "url": "https://dividend.forum/",
-            "description": "A free dividend calendar to track ex-dividend dates, yields, and payout frequencies for Canadian stocks on the TSX.",
+            "description": "Free tool to track ex-dividend dates, payout yields, and dividend growth for Toronto Stock Exchange (TSX) listed stocks.",
             "potentialAction": {
                 "@type": "SearchAction",
                 "target": "https://dividend.forum/search?symbol={search_term_string}",
@@ -47,11 +60,24 @@
             }
         }
         </script>
+        
+        <!-- Additional Schema for Stocks Data -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "DataFeed",
+            "dataFeedElement": {
+                "@type": "FinancialProduct",
+                "name": "TSX Dividend Stocks",
+                "description": "Real-time dividend data for Canadian stocks on the Toronto Stock Exchange.",
+                "category": "Investing",
+                "url": "https://dividend.forum/"
+            }
+        }
+        </script>
     
-        <!-- Fonts -->
+        <!-- ================== FONTS & ASSETS ================== -->
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
-    
-        <!-- Favicon -->
         <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
         <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
         <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
