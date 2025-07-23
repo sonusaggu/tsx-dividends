@@ -624,11 +624,11 @@ a:hover {
 .company-col { width: 260px; }
 .sector-col { width: 100px; }
 .ex-date-col { width: 170px; } /* Wider ex-date column */
-.pay-date-col { width: 90px; }
+.pay-date-col { width: 100px; }
 .price-col { width: 90px; }
 .yield-col { width: 90px; }
 .amount-col { width: 110px; }
-.freq-col { width: 80px; }
+.freq-col { width: 70px; }
 
 /* Right alignment for numeric columns */
 .text-end {
