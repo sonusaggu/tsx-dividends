@@ -49,6 +49,9 @@ function setupEventListeners() {
         button.addEventListener('click', handleTimeframeFilter);
     });
 
+    // Set 'All' as active by default
+    document.querySelector('[data-days="all"]').classList.add('active');
+
     // Pagination
     elements.pagination.addEventListener('click', handlePagination);
 
@@ -83,11 +86,17 @@ function handleTimeframeFilter(e) {
     });
     
     elements.highYieldFilter.classList.remove('active');
-    elements.timeframeTitle.textContent = `${e.target.textContent} Upcoming Dividend Stocks`;
+    
+    // Update title based on selection
+    const timeframeText = e.target.textContent === 'All' ? 'All Upcoming' : `Next ${e.target.textContent}`;
+    if (elements.timeframeTitle) {
+        elements.timeframeTitle.innerHTML = `<i class="bi bi-tags me-2"></i> ${timeframeText} Dividend Stocks`;
+    }
+    
     elements.symbolSearch.value = '';
     elements.searchFeedback.textContent = '';
     
-    fetchStocks(state.currentDaysFilter);
+    filterAndRenderStocks(true);
 }
 
 // Handle pagination clicks
@@ -134,14 +143,13 @@ function toggleHighYieldFilter() {
 }
 
 // Fetch stocks data from API
-async function fetchStocks(days = null) {
+async function fetchStocks() {
     showLoading(true);
     elements.errorMessage.classList.add('d-none');
     elements.stocksData.innerHTML = '';
     
     try {
-        const url = days ? `${config.apiEndpoints.stocks}?days=${days}` : config.apiEndpoints.stocks;
-        const response = await fetch(url);
+        const response = await fetch(config.apiEndpoints.stocks);
         const data = await response.json();
         
         if (!response.ok || !data.success) {
@@ -150,7 +158,7 @@ async function fetchStocks(days = null) {
         
         state.allStocks = data.data;
         updateSectorTags(state.allStocks);
-        filterAndRenderStocks(true); // Exclude past dividends by default
+        filterAndRenderStocks(true);
         
         // Update last updated time
         const updatedTime = new Date(data.updated).toLocaleString();
@@ -200,7 +208,7 @@ async function searchBySymbol() {
             showSearchFeedback(`Showing results for ${symbol}`, 'text-success');
             state.allStocks = data.data;
             updateSectorTags(state.allStocks);
-            filterAndRenderStocks(false); // Show all including past dividends for search
+            filterAndRenderStocks(false);
         }
         
         // Update last updated time
@@ -230,9 +238,10 @@ function clearSearch() {
     
     // Reset UI
     elements.highYieldFilter.classList.remove('active');
-    document.querySelector('#sector-tags .sector-tag[data-sector="all"]').click();
-    
-    fetchStocks(state.currentDaysFilter);
+    document.querySelector('[data-days="all"]').click();
+    if (document.querySelector('#sector-tags .sector-tag[data-sector="all"]')) {
+        document.querySelector('#sector-tags .sector-tag[data-sector="all"]').click();
+    }
 }
 
 // Filter stocks based on current filters
@@ -243,6 +252,14 @@ function filterAndRenderStocks(excludePast = true) {
     if (excludePast) {
         state.filteredStocks = state.filteredStocks.filter(stock => 
             typeof stock.days_until === 'number' && stock.days_until >= 0
+        );
+    }
+    
+    // Apply days filter if set
+    if (state.currentDaysFilter !== null) {
+        state.filteredStocks = state.filteredStocks.filter(stock => 
+            typeof stock.days_until === 'number' && 
+            stock.days_until <= state.currentDaysFilter
         );
     }
     
@@ -340,27 +357,6 @@ function formatDaysBadge(days) {
     return `<span class="badge ${badgeClass} ms-2">
         ${days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d`}
     </span>`;
-}
-
-function formatExDate(stock) {
-    if (!stock.upcoming_date) return 'N/A';
-    
-    const daysUntil = stock.days_until;
-    let badgeClass = 'bg-primary';
-    
-    if (daysUntil === 0) badgeClass = 'bg-danger';
-    else if (daysUntil <= 3 && daysUntil > 0) badgeClass = 'bg-warning';
-    
-    return `
-    <div class="d-flex align-items-center gap-2">
-        <span>${stock.upcoming_date}</span>
-        <span class="badge ${badgeClass}">
-            ${daysUntil === 0 ? 'Today' : 
-             daysUntil === 1 ? 'Tomorrow' : 
-             `${daysUntil}d`}
-        </span>
-    </div>
-    `;
 }
 
 // Render no results message
